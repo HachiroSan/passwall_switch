@@ -40,10 +40,6 @@ python app.py
 ```
 
 ## Deploy (Windows)
-- Make sure you have your icon at assets/passwall.ico
-- After the first deploy, edit the generated pyside6_deploy.spec file and set:
-  icon="assets/passwall.ico"
-- Then run:
 ```
 pip install pyside6-deploy
 pyside6-deploy app.py
