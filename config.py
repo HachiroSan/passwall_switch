@@ -16,7 +16,8 @@ class Config:
             },
             "app": {
                 "poll_interval": 3,
-                "theme": "dark_teal.xml"
+                "theme": "dark_teal.xml",
+                "start_on_startup": False
             }
         }
         self.config = self.load_config()

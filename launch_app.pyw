@@ -22,15 +22,26 @@ def main():
         except Exception as e:
             show_error("Error starting application", str(e))
     else:
-        # Not in a virtual environment, use the batch file
-        batch_path = os.path.join(script_dir, "start_passwall_switch.bat")
-        if os.path.exists(batch_path):
+        # Not in a virtual environment, try to activate it and run
+        venv_activate = os.path.join(script_dir, "venv", "Scripts", "activate.bat")
+        if os.path.exists(venv_activate):
             try:
-                subprocess.Popen([batch_path], shell=True)
+                # Use the batch file to activate venv and run
+                batch_path = os.path.join(script_dir, "start_passwall_switch.bat")
+                if os.path.exists(batch_path):
+                    subprocess.Popen([batch_path], shell=True)
+                else:
+                    # Fallback: try to run with venv python directly
+                    venv_python = os.path.join(script_dir, "venv", "Scripts", "pythonw.exe")
+                    if os.path.exists(venv_python):
+                        app_path = os.path.join(script_dir, "app.pyw")
+                        subprocess.Popen([venv_python, app_path], shell=True)
+                    else:
+                        show_error("Missing Files", "Virtual environment not found. Please ensure venv is properly set up.")
             except Exception as e:
-                show_error("Error launching application", f"Could not start batch file: {e}")
+                show_error("Error launching application", f"Could not start application: {e}")
         else:
-            show_error("Missing Files", "start_passwall_switch.bat not found. Please ensure all files are in the same directory.")
+            show_error("Missing Virtual Environment", "Virtual environment not found. Please ensure venv is properly set up.")
 
 def show_error(title, message):
     """Show an error dialog."""

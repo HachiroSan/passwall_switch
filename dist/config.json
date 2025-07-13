@@ -3,12 +3,11 @@
         "host": "192.168.1.1",
         "user": "root",
         "port": 22,
-        "password": "password",
+        "password": null,
         "key_file": null
     },
     "app": {
-        "poll_interval": 60,
-        "theme": "dark_teal.xml",
-        "start_on_startup": true
+        "poll_interval": 3,
+        "theme": "dark_teal.xml"
     }
 }
