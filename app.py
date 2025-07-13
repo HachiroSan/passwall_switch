@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Pass Wall Switch Dashboard")
+        self.setWindowTitle("Pass Wall Switcher")
         self.setMinimumSize(400, 300)
         self.setWindowIcon(QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "passwall.ico")))
 
