@@ -385,27 +385,17 @@ class PasswallTrayApp(QApplication):
         }
 
     def _get_startup_exe_path(self):
-        # Return the path to the startup wrapper or the frozen exe
+        # Return the path to launch_app.pyw or the frozen exe
         if getattr(sys, 'frozen', False):
             return sys.executable
         else:
-            # Check for startup wrapper first (adds delay for system tray)
-            wrapper_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "startup_wrapper.bat")
-            if os.path.exists(wrapper_path):
-                return f'"{wrapper_path}"'
+            # Use launch_app.pyw directly - it handles virtual environment activation
+            launch_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "launch_app.pyw")
+            if os.path.exists(launch_path):
+                return f'"{sys.executable}" "{launch_path}"'
             else:
-                # Check for compiled executable
-                exe_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app.exe")
-                if os.path.exists(exe_path):
-                    return f'"{exe_path}"'
-                else:
-                    # Fallback to launch_app.pyw that handles virtual environment activation
-                    launch_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "launch_app.pyw")
-                    if os.path.exists(launch_path):
-                        return f'"{sys.executable}" "{launch_path}"'
-                    else:
-                        # Fallback to direct pythonw.exe if launch file doesn't exist
-                        return f'"{sys.executable}" "{os.path.abspath(sys.argv[0])}"'
+                # Fallback to direct pythonw.exe if launch file doesn't exist
+                return f'"{sys.executable}" "{os.path.abspath(sys.argv[0])}"'
 
     def _sync_startup_registry(self):
         """Ensure the registry matches the config setting."""
