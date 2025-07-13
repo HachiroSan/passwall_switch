@@ -179,6 +179,7 @@ class StatusWorker(QThread):
     status_updated = Signal(str)
     ip_updated = Signal(str)
     log_message = Signal(str)
+    refresh_ip_requested = Signal()
 
     def __init__(self, manager):
         super().__init__()
@@ -208,11 +209,11 @@ class StatusWorker(QThread):
     @Slot()
     def check_ip(self):
         """Perform a single IP check and emit the result."""
-        self.log_message.emit("INFO: Initiating IP address check - connecting to OpenWrt router via SSH...")
+        self.log_message.emit("INFO: Initiating IP address check - using current device network interface via HTTP requests...")
         ip = self.manager.get_current_ip()
         
         if ip == "error":
-            self.log_message.emit("ERROR: Failed to retrieve current IP address from router")
+            self.log_message.emit("ERROR: Failed to retrieve current IP address from external services")
         else:
             self.log_message.emit(f"SUCCESS: IP address check completed - current IP: {ip}")
             
@@ -307,6 +308,7 @@ class PasswallTrayApp(QApplication):
         self.window.refresh_requested.connect(self.worker.check_status)
         self.window.refresh_ip_requested.connect(self.worker.check_ip)
         self.window.toggle_requested.connect(self.handle_toggle_request)
+        self.worker.refresh_ip_requested.connect(self.worker.check_ip)
 
         # Setup Tray Icon
         self._setup_tray_icon()
@@ -342,7 +344,7 @@ class PasswallTrayApp(QApplication):
         self.toggle_action = QAction("Toggle Passwall")
         self.toggle_action.triggered.connect(self.handle_toggle_request)
         self.refresh_ip_action = QAction("Refresh IP")
-        self.refresh_ip_action.triggered.connect(self.worker.check_ip)
+        self.refresh_ip_action.triggered.connect(self.handle_refresh_ip_request)
         self.show_action = QAction("Show Window")
         self.show_action.triggered.connect(self.window.show)
         self.quit_action = QAction("Quit")
@@ -374,6 +376,11 @@ class PasswallTrayApp(QApplication):
     def handle_toggle_request(self):
         """Pass the toggle request to the worker thread with the current status."""
         self.worker.request_toggle(self.current_status)
+
+    @Slot()
+    def handle_refresh_ip_request(self):
+        """Pass the refresh IP request to the worker thread."""
+        self.worker.refresh_ip_requested.emit()
 
     @Slot(str)
     def update_status(self, status):
