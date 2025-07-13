@@ -1,0 +1,13 @@
+{
+    "ssh": {
+        "host": "192.168.1.1",
+        "user": "root",
+        "port": 22,
+        "password": "password",
+        "key_file": null
+    },
+    "app": {
+        "poll_interval": 60,
+        "theme": "dark_teal.xml"
+    }
+}
