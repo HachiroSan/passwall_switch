@@ -314,7 +314,13 @@ class PasswallTrayApp(QApplication):
         self._setup_tray_icon()
         self._load_icons()
         self.tray_icon.setIcon(self.icons["error"])
-        self.tray_icon.show()
+        
+        # Ensure system tray is available before showing
+        if not QSystemTrayIcon.isSystemTrayAvailable():
+            # If system tray is not available, wait a bit and try again
+            QTimer.singleShot(5000, self._retry_show_tray)
+        else:
+            self.tray_icon.show()
 
         # Start background worker and show window
         self.worker.start()
@@ -323,6 +329,13 @@ class PasswallTrayApp(QApplication):
         # Ensure startup registry matches config
         if platform.system() == "Windows":
             self._sync_startup_registry()
+            
+        # Log startup completion
+        self.window.log("Application startup completed successfully.")
+        if QSystemTrayIcon.isSystemTrayAvailable():
+            self.window.log("System tray is available.")
+        else:
+            self.window.log("WARNING: System tray is not available - will retry.")
 
     def _setup_tray_icon(self):
         self.tray_icon = QSystemTrayIcon()
@@ -372,17 +385,27 @@ class PasswallTrayApp(QApplication):
         }
 
     def _get_startup_exe_path(self):
-        # Return the path to the pythonw.exe or the frozen exe
+        # Return the path to the startup wrapper or the frozen exe
         if getattr(sys, 'frozen', False):
             return sys.executable
         else:
-            # Use the launch_app.pyw that handles virtual environment activation
-            launch_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "launch_app.pyw")
-            if os.path.exists(launch_path):
-                return f'"{sys.executable}" "{launch_path}"'
+            # Check for startup wrapper first (adds delay for system tray)
+            wrapper_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "startup_wrapper.bat")
+            if os.path.exists(wrapper_path):
+                return f'"{wrapper_path}"'
             else:
-                # Fallback to direct pythonw.exe if launch file doesn't exist
-                return f'"{sys.executable}" "{os.path.abspath(sys.argv[0])}"'
+                # Check for compiled executable
+                exe_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app.exe")
+                if os.path.exists(exe_path):
+                    return f'"{exe_path}"'
+                else:
+                    # Fallback to launch_app.pyw that handles virtual environment activation
+                    launch_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "launch_app.pyw")
+                    if os.path.exists(launch_path):
+                        return f'"{sys.executable}" "{launch_path}"'
+                    else:
+                        # Fallback to direct pythonw.exe if launch file doesn't exist
+                        return f'"{sys.executable}" "{os.path.abspath(sys.argv[0])}"'
 
     def _sync_startup_registry(self):
         """Ensure the registry matches the config setting."""
@@ -481,6 +504,16 @@ class PasswallTrayApp(QApplication):
     def run(self):
         """Start the Qt event loop."""
         sys.exit(self.exec())
+
+    def _retry_show_tray(self):
+        """Retry showing the tray icon if system tray wasn't available initially."""
+        if QSystemTrayIcon.isSystemTrayAvailable():
+            self.tray_icon.show()
+            self.window.log("System tray is now available - tray icon shown.")
+        else:
+            # Try again in 5 more seconds
+            QTimer.singleShot(5000, self._retry_show_tray)
+            self.window.log("System tray still not available - will retry in 5 seconds.")
 
     def quit_app(self):
         """Cleanly stop background thread, close SSH, and quit app."""
