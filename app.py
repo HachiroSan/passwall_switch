@@ -376,7 +376,13 @@ class PasswallTrayApp(QApplication):
         if getattr(sys, 'frozen', False):
             return sys.executable
         else:
-            return f'"{sys.executable}" "{os.path.abspath(sys.argv[0])}"'
+            # Use the batch file that handles virtual environment activation
+            batch_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "start_passwall_switch.bat")
+            if os.path.exists(batch_path):
+                return f'"{batch_path}"'
+            else:
+                # Fallback to direct pythonw.exe if batch file doesn't exist
+                return f'"{sys.executable}" "{os.path.abspath(sys.argv[0])}"'
 
     def _sync_startup_registry(self):
         """Ensure the registry matches the config setting."""
