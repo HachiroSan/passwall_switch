@@ -266,6 +266,7 @@ class PasswallTrayApp(QApplication):
         super().__init__(*args, **kwargs)
         self.current_status = "unknown"
         self.current_ip = "Unknown"
+        self.last_notified_status = None
 
         # Load configuration
         self.config = Config()
@@ -410,26 +411,37 @@ class PasswallTrayApp(QApplication):
         icon = self.icons.get(status, self.icons["error"])
         self.tray_icon.setIcon(icon)
 
-        if status == "active":
-            self.toggle_action.setText("Disable Passwall")
-            self.tray_icon.showMessage(
-                "Passwall Switch",
-                "Passwall has been activated and is now running.",
-                QSystemTrayIcon.Information
-            )
-        elif status == "inactive":
-            self.toggle_action.setText("Enable Passwall")
-            self.tray_icon.showMessage(
-                "Passwall Switch",
-                "Passwall has been deactivated and is now stopped.",
-                QSystemTrayIcon.Information
-            )
-        elif status == "error":
-            self.tray_icon.showMessage(
-                "Passwall Switch",
-                "Failed to connect or retrieve status.",
-                QSystemTrayIcon.Critical
-            )
+        # Only show notification if status changed
+        if status != self.last_notified_status:
+            if status == "active":
+                self.toggle_action.setText("Disable Passwall")
+                self.tray_icon.showMessage(
+                    "Passwall Switch",
+                    "Passwall has been activated and is now running.",
+                    QSystemTrayIcon.Information
+                )
+            elif status == "inactive":
+                self.toggle_action.setText("Enable Passwall")
+                self.tray_icon.showMessage(
+                    "Passwall Switch",
+                    "Passwall has been deactivated and is now stopped.",
+                    QSystemTrayIcon.Information
+                )
+            elif status == "error":
+                self.tray_icon.showMessage(
+                    "Passwall Switch",
+                    "Failed to connect or retrieve status.",
+                    QSystemTrayIcon.Critical
+                )
+            self.last_notified_status = status
+        else:
+            # Just update the toggle action text if needed
+            if status == "active":
+                self.toggle_action.setText("Disable Passwall")
+            elif status == "inactive":
+                self.toggle_action.setText("Enable Passwall")
+            else:
+                self.toggle_action.setText("Toggle Passwall")
 
     @Slot(str)
     def update_ip(self, ip):
