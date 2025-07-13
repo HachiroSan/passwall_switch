@@ -4,8 +4,6 @@ import sys
 import os
 from datetime import datetime
 import platform
-if platform.system() == "Windows":
-    import winreg
 from PySide6.QtWidgets import (
     QApplication, QSystemTrayIcon, QMenu, QMainWindow, QLabel, QPushButton,
     QVBoxLayout, QWidget, QTextEdit, QHBoxLayout, QFrame
@@ -326,10 +324,6 @@ class PasswallTrayApp(QApplication):
         self.worker.start()
         self.window.show()
 
-        # Ensure startup registry matches config
-        if platform.system() == "Windows":
-            self._sync_startup_registry()
-            
         # Log startup completion
         self.window.log("Application startup completed successfully.")
         if QSystemTrayIcon.isSystemTrayAvailable():
@@ -354,21 +348,11 @@ class PasswallTrayApp(QApplication):
         self.quit_action = QAction("Quit")
         self.quit_action.triggered.connect(self.quit_app)
 
-        # Add 'Start on Windows startup' option (Windows only)
-        if platform.system() == "Windows":
-            self.startup_action = QAction("Start on Windows startup")
-            self.startup_action.setCheckable(True)
-            start_on_startup = self.config.get('app.start_on_startup')
-            self.startup_action.setChecked(bool(start_on_startup))
-            self.startup_action.toggled.connect(self.toggle_startup)
-
         self.menu.addAction(self.status_action)
         self.menu.addAction(self.ip_action)
         self.menu.addSeparator()
         self.menu.addAction(self.toggle_action)
         self.menu.addAction(self.refresh_ip_action)
-        if platform.system() == "Windows":
-            self.menu.addAction(self.startup_action)
         self.menu.addAction(self.show_action)
         self.menu.addSeparator()
         self.menu.addAction(self.quit_action)
@@ -384,51 +368,7 @@ class PasswallTrayApp(QApplication):
             "error": QIcon(os.path.join(assets_path, "passwall_error.svg"))
         }
 
-    def _get_startup_exe_path(self):
-        # Return the path to launch_app.pyw or the frozen exe
-        if getattr(sys, 'frozen', False):
-            return sys.executable
-        else:
-            # Use launch_app.pyw directly - it handles virtual environment activation
-            launch_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "launch_app.pyw")
-            if os.path.exists(launch_path):
-                return f'"{sys.executable}" "{launch_path}"'
-            else:
-                # Fallback to direct pythonw.exe if launch file doesn't exist
-                return f'"{sys.executable}" "{os.path.abspath(sys.argv[0])}"'
 
-    def _sync_startup_registry(self):
-        """Ensure the registry matches the config setting."""
-        start_on_startup = self.config.get('app.start_on_startup')
-        if start_on_startup:
-            self._add_to_startup()
-        else:
-            self._remove_from_startup()
-
-    def toggle_startup(self, checked):
-        self.config.set('app.start_on_startup', checked)
-        if checked:
-            self._add_to_startup()
-            self.window.log("Enabled start on Windows startup.")
-        else:
-            self._remove_from_startup()
-            self.window.log("Disabled start on Windows startup.")
-
-    def _add_to_startup(self):
-        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
-                             r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
-        exe_path = self._get_startup_exe_path()
-        winreg.SetValueEx(key, "PassWallSwitcher", 0, winreg.REG_SZ, exe_path)
-        winreg.CloseKey(key)
-
-    def _remove_from_startup(self):
-        try:
-            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
-                                 r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
-            winreg.DeleteValue(key, "PassWallSwitcher")
-            winreg.CloseKey(key)
-        except FileNotFoundError:
-            pass
 
     @Slot()
     def handle_toggle_request(self):
