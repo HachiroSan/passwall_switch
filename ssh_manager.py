@@ -3,9 +3,9 @@ import paramiko
 import os
 from datetime import datetime
 
-class PasswallManager:
+class PassWallManager:
     """
-    Handles SSH communication with the OpenWrt gateway to manage Passwall service.
+    Handles SSH communication with the OpenWrt gateway to manage Pass Wall service.
     Provides methods to get status and toggle the service.
     """
     def __init__(self, host, user, port=22, password=None, key_file=None):
@@ -74,7 +74,7 @@ class PasswallManager:
             return None, str(e)
 
     def get_status(self, log_message=None):
-        """Check if Passwall is running. Returns 'active', 'inactive', or 'error'."""
+        """Check if Pass Wall is running. Returns 'active', 'inactive', or 'error'."""
         command = "ps w | grep '[p]asswall'"
         stdout, stderr = self._execute_command(command, log_message=log_message)
         if stdout is None:
@@ -84,7 +84,7 @@ class PasswallManager:
         return "inactive"
 
     def toggle_service(self, current_status, log_message=None):
-        """Start or stop Passwall based on current_status. Returns 'ok' or 'error'."""
+        """Start or stop Pass Wall based on current_status. Returns 'ok' or 'error'."""
         action = "stop" if current_status == "active" else "start"
         command = f"/etc/init.d/passwall {action}"
         stdout, stderr = self._execute_command(command, log_message=log_message)

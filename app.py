@@ -26,6 +26,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Passwall Switch Dashboard")
         self.setMinimumSize(400, 300)
+        self.setWindowIcon(QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "passwall.ico")))
 
         # --- UI Elements ---
         self.status_indicator = QLabel("Unknown")
@@ -83,9 +84,9 @@ class MainWindow(QMainWindow):
     def update_status_ui(self, status):
         """Update the UI elements based on the new status."""
         status_descriptions = {
-            "active": "Passwall service is currently ACTIVE and running",
-            "inactive": "Passwall service is currently INACTIVE and stopped", 
-            "error": "ERROR: Unable to determine Passwall service status",
+            "active": "Pass Wall service is currently ACTIVE and running",
+            "inactive": "Pass Wall service is currently INACTIVE and stopped", 
+            "error": "ERROR: Unable to determine Pass Wall service status",
             "unknown": "UNKNOWN: Service status has not been determined yet"
         }
         
@@ -132,13 +133,13 @@ class StatusWorker(QThread):
         status = self.manager.get_status()
         
         if status == "error":
-            self.log_message.emit("ERROR: Failed to retrieve Passwall service status from router")
+            self.log_message.emit("ERROR: Failed to retrieve Pass Wall service status from router")
         elif status == "active":
-            self.log_message.emit("SUCCESS: Passwall service status check completed - service is ACTIVE")
+            self.log_message.emit("SUCCESS: Pass Wall service status check completed - service is ACTIVE")
         elif status == "inactive":
-            self.log_message.emit("SUCCESS: Passwall service status check completed - service is INACTIVE")
+            self.log_message.emit("SUCCESS: Pass Wall service status check completed - service is INACTIVE")
         else:
-            self.log_message.emit(f"INFO: Passwall service status check completed - status: {status.upper()}")
+            self.log_message.emit(f"INFO: Pass Wall service status check completed - status: {status.upper()}")
             
         self.status_updated.emit(status)
 
@@ -146,14 +147,14 @@ class StatusWorker(QThread):
     def request_toggle(self, current_status):
         """Toggle the service in the background and then check status."""
         action = "STOP" if current_status == "active" else "START"
-        self.log_message.emit(f"INFO: Initiating Passwall service toggle operation - attempting to {action} service (current state: {current_status.upper()})")
+        self.log_message.emit(f"INFO: Initiating Pass Wall service toggle operation - attempting to {action} service (current state: {current_status.upper()})")
         
         result = self.manager.toggle_service(current_status)
         
         if result == "error":
-            self.log_message.emit(f"ERROR: Failed to {action.lower()} Passwall service - SSH command execution failed")
+            self.log_message.emit(f"ERROR: Failed to {action.lower()} Pass Wall service - SSH command execution failed")
         else:
-            self.log_message.emit(f"SUCCESS: Passwall service {action.lower()} command sent successfully to router")
+            self.log_message.emit(f"SUCCESS: Pass Wall service {action.lower()} command sent successfully to router")
             
         # After toggling, always check the actual status to be sure
         self.log_message.emit("INFO: Verifying service state change by performing status check...")
