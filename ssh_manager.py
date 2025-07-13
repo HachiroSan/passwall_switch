@@ -92,6 +92,41 @@ class PassWallManager:
             return "error"
         return "ok"
 
+    def get_current_ip(self, log_message=None):
+        """Get the current public IP address. Returns IP string or 'error'."""
+        # Try multiple commands to get IP address
+        commands = [
+            "curl -s ifconfig.me",  # Public IP via ifconfig.me
+            "curl -s ipinfo.io/ip",  # Public IP via ipinfo.io
+            "curl -s icanhazip.com",  # Public IP via icanhazip.com
+            "wget -qO- ifconfig.me",  # Alternative using wget
+        ]
+        
+        for command in commands:
+            stdout, stderr = self._execute_command(command, log_message=log_message)
+            if stdout and stdout.strip() and not stderr:
+                ip = stdout.strip()
+                # Basic IP validation
+                if self._is_valid_ip(ip):
+                    self._log(f"SUCCESS: Retrieved current IP address: {ip}", log_message)
+                    return ip
+        
+        self._log("ERROR: Failed to retrieve current IP address from all sources", log_message)
+        return "error"
+
+    def _is_valid_ip(self, ip):
+        """Basic validation for IP address format."""
+        try:
+            parts = ip.split('.')
+            if len(parts) != 4:
+                return False
+            for part in parts:
+                if not part.isdigit() or not 0 <= int(part) <= 255:
+                    return False
+            return True
+        except:
+            return False
+
     def close(self, log_message=None):
         """Close the SSH connection."""
         if self.client:
