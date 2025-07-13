@@ -17,6 +17,12 @@ from qt_material import apply_stylesheet
 from ssh_manager import PassWallManager
 from config import Config
 
+# Ensure working directory is the folder containing the executable or script
+if getattr(sys, 'frozen', False):
+    os.chdir(os.path.dirname(sys.executable))
+else:
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 
 class MainWindow(QMainWindow):
     """
@@ -246,14 +252,23 @@ class StatusWorker(QThread):
             if self.ip_check_counter >= self.ip_check_interval:
                 self.check_ip()
                 self.ip_check_counter = 0
-                
-            self.sleep(self.poll_interval)
+            
+            # Use shorter sleep intervals to be more responsive to stop signal
+            sleep_time = min(self.poll_interval, 1.0)  # Sleep for 1 second max
+            for _ in range(int(self.poll_interval / sleep_time)):
+                if not self.running:
+                    break
+                self.sleep(sleep_time)
 
     def stop(self):
-        """Stop the thread and wait for it to finish."""
+        """Stop the thread and wait for it to finish with timeout."""
         self.log_message.emit("INFO: Stopping background status monitoring thread...")
         self.running = False
-        self.wait()
+        # Wait with timeout to avoid blocking the UI
+        if not self.wait(2000):  # 2 second timeout
+            self.log_message.emit("WARNING: Background thread did not stop within timeout, forcing termination")
+            self.terminate()
+            self.wait(1000)  # Give it 1 more second to terminate
         self.log_message.emit("INFO: Background status monitoring thread stopped successfully")
 
 
@@ -464,8 +479,20 @@ class PasswallTrayApp(QApplication):
     def quit_app(self):
         """Cleanly stop background thread, close SSH, and quit app."""
         self.window.log("Quitting application...")
+        
+        # Disable the quit action to prevent multiple clicks
+        self.quit_action.setEnabled(False)
+        
+        # Stop the worker thread (with timeout)
         self.worker.stop()
-        self.manager.close()
+        
+        # Close SSH connection (non-blocking)
+        try:
+            self.manager.close()
+        except Exception as e:
+            self.window.log(f"WARNING: Error closing SSH connection: {e}")
+        
+        # Quit immediately
         self.quit()
 
 

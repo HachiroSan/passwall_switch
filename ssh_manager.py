@@ -130,5 +130,11 @@ class PassWallManager:
     def close(self, log_message=None):
         """Close the SSH connection."""
         if self.client:
-            self.client.close()
-            self._log("INFO: SSH connection closed.", log_message)
+            try:
+                # Close the transport immediately to avoid hanging
+                if self.client.get_transport():
+                    self.client.get_transport().close()
+                self.client.close()
+                self._log("INFO: SSH connection closed.", log_message)
+            except Exception as e:
+                self._log(f"WARNING: Error closing SSH connection: {e}", log_message)
