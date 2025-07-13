@@ -11,7 +11,7 @@ from PySide6.QtGui import QIcon, QAction, QColor, QPalette
 from PySide6.QtCore import QThread, Signal, QTimer, Qt, Slot
 from PySide6.QtSvgWidgets import QSvgWidget
 from qt_material import apply_stylesheet
-from ssh_manager import PasswallManager
+from ssh_manager import PassWallManager
 from config import Config
 
 
@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Passwall Switch Dashboard")
+        self.setWindowTitle("Pass Wall Switch Dashboard")
         self.setMinimumSize(400, 300)
         self.setWindowIcon(QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "passwall.ico")))
 
@@ -189,7 +189,7 @@ class PasswallTrayApp(QApplication):
         apply_stylesheet(self, theme=self.config.get('app.theme'))
 
         # Initialize SSH manager (but don't connect yet)
-        self.manager = PasswallManager(
+        self.manager = PassWallManager(
             host=self.config.get('ssh.host'),
             user=self.config.get('ssh.user'),
             port=self.config.get('ssh.port'),
