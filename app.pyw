@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Passwall Switch - System Tray Application
+Pass Wall Switch - System Tray Application
 Runs without console window when double-clicked
 """
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
                 
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Critical)
-                msg.setWindowTitle("Passwall Switch - Missing Dependencies")
+                msg.setWindowTitle("Pass Wall Switch - Missing Dependencies")
                 msg.setText("Required dependencies are not available.")
                 msg.setDetailedText(f"Error: {deps_ok[1]}\n\nPlease ensure the virtual environment is activated or dependencies are installed.")
                 msg.setStandardButtons(QMessageBox.Ok)
@@ -67,8 +67,8 @@ if __name__ == "__main__":
             
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
-            msg.setWindowTitle("Passwall Switch Error")
-            msg.setText("An error occurred while starting Passwall Switch:")
+            msg.setWindowTitle("Pass Wall Switch Error")
+            msg.setText("An error occurred while starting Pass Wall Switch:")
             msg.setDetailedText(str(e))
             msg.setStandardButtons(QMessageBox.Ok)
             

@@ -326,7 +326,7 @@ class PasswallTrayApp(QApplication):
 
     def _setup_tray_icon(self):
         self.tray_icon = QSystemTrayIcon()
-        self.tray_icon.setToolTip("Passwall Switch")
+        self.tray_icon.setToolTip("Pass Wall Switch")
         self.menu = QMenu()
         self.status_action = QAction("Status: Unknown")
         self.status_action.setEnabled(False)
@@ -437,20 +437,20 @@ class PasswallTrayApp(QApplication):
             if status == "active":
                 self.toggle_action.setText("Disable Passwall")
                 self.tray_icon.showMessage(
-                    "Passwall Switch",
+                    "Pass Wall Switch",
                     "Passwall has been activated and is now running.",
                     QSystemTrayIcon.Information
                 )
             elif status == "inactive":
                 self.toggle_action.setText("Enable Passwall")
                 self.tray_icon.showMessage(
-                    "Passwall Switch",
+                    "Pass Wall Switch",
                     "Passwall has been deactivated and is now stopped.",
                     QSystemTrayIcon.Information
                 )
             elif status == "error":
                 self.tray_icon.showMessage(
-                    "Passwall Switch",
+                    "Pass Wall Switch",
                     "Failed to connect or retrieve status.",
                     QSystemTrayIcon.Critical
                 )
@@ -473,7 +473,7 @@ class PasswallTrayApp(QApplication):
         
         if ip != "error":
             self.tray_icon.showMessage(
-                "Passwall Switch",
+                "Pass Wall Switch",
                 f"Current IP address: {ip}",
                 QSystemTrayIcon.Information
             )

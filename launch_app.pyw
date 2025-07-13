@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple launcher for Passwall Switch
+Simple launcher for Pass Wall Switch
 This script can be double-clicked to run the app with proper virtual environment
 """
 
