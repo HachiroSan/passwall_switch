@@ -1,68 +1,46 @@
 # Passwall Switch System Tray App
 
-A simple, beautiful, and efficient system tray application to monitor and control your Passwall service on OpenWrt via SSH.
+A system tray application to monitor and control Passwall on OpenWrt via SSH.
 
 ## Features
-- System tray icon shows Passwall status (active, inactive, error)
-- Right-click menu to enable/disable Passwall and quit
-- Automatic status polling every 3 seconds
-- Material Design (Dracula theme)
+- Shows Passwall status (active, inactive, error)
+- Enable/disable Passwall from tray menu
+- Status polling (default: every 60 seconds)
+- Windows notifications on status change
+
+## Note
+This app communicates with Passwall using SSH commands, not JSON-RPC, to keep things simple.
+
+## How it Works
+The app connects to your OpenWrt device over SSH and runs commands to enable or disable the Passwall service. It checks the service status and allows you to toggle it from the system tray.
 
 ## Requirements
 - Python 3.8+
 - OpenWrt device with SSH access
+- Passwall must be installed on the OpenWrt device
 
-## Installation
-1. Clone this repository.
-2. Create and activate a virtual environment (optional but recommended):
-   ```bash
+## Setup
+1. Clone the repository.
+2. Create and activate a virtual environment:
+   ```
    python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   venv\Scripts\activate
    ```
 3. Install dependencies:
-   ```bash
+   ```
    pip install -r requirements.txt
    ```
 
-## Usage
-1. Run the app:
-   ```bash
-   python app.py
-   ```
-2. The app will appear in your system tray.
-3. On first run, a `config.json` file will be created with default settings.
-
 ## Configuration
-The app uses a `config.json` file for settings:
-```json
-{
-    "ssh": {
-        "host": "192.168.1.1",
-        "user": "root",
-        "port": 22,
-        "password": null,
-        "key_file": null
-    },
-    "app": {
-        "poll_interval": 3,
-        "theme": "dark_teal.xml"
-    }
-}
+Edit `config.json` for SSH and app settings.
+
+## Run
+```
+python app.py
 ```
 
-### SSH Authentication Options:
-- **Passwordless (default)**: Uses SSH key authentication (recommended)
-- **Password**: Set `"password": "your_password"` in config.json
-- **Key file**: Set `"key_file": "/path/to/private/key"` in config.json
-
-**Security Note**: If using password authentication, ensure config.json has proper file permissions (600).
-
-## Packaging (Optional)
-To create a standalone executable (e.g., for Windows):
-```bash
-pip install pyinstaller
-pyinstaller --onefile --windowed app.py
+## Deploy (Windows)
 ```
-
-## License
-MIT 
+pip install pyside6-deploy
+pyside6-deploy app.py
+``` 
